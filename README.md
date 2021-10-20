@@ -7,7 +7,7 @@
 ### General configuration/initialisation
 ```python
 # SparkContext	connection to Spark to create RDDs
-# SQLContext		connects to Spark to run SQL on data
+# SQLContext	connects to Spark to run SQL on data
 # SparkSession	all-encompassing context
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
@@ -27,10 +27,10 @@ sqlContext = SQLContext(spark)
 ```python
 from pyspark.sql import SparkSession
 spark = SparkSession \
-			.builder \
-			.appName("something")
-			.config("spark.some.config.option", "something")\
-			.getOrCreate()
+    .builder \
+    .appName("something")
+    .config("spark.some.config.option", "something")\
+    .getOrCreate()
 
 # stop spark session: spark.stop()
 ```
@@ -66,10 +66,10 @@ df = spark.read.csv("filename.csv")
 df = spark.read.csv("filename.csv", header=True)
 # alternatively:
 df = spark \
-		.read \
-		.format('csv') \
-		.options(header=True, inferSchema=True) \
-		.load(csv_file_path)
+    .read \
+    .format('csv') \
+    .options(header=True, inferSchema=True) \
+    .load(csv_file_path)
 
 # json
 df = spark.read.json("customer.json")
@@ -94,19 +94,19 @@ df.select("firstName", "age")\
 ```python
 # parquet
 df.write \
-	.partitionBy('year') \
-	.format('parquet') \
-	.mode('overwrite') \ # 'append' to append to existing file
-	.save(parquet_file_path)
+    .partitionBy('year') \
+    .format('parquet') \
+    .mode('overwrite') \ # 'append' to append to existing file
+    .save(parquet_file_path)
 ```
 
 ### Write to database
 ```python
 # hive table
 df.write \
-	.bucketBy(10, 'year') \
-	.sortBy('avg_ratings') \
-	.saveAsTable('films_bucketed')
+    .bucketBy(10, 'year') \
+    .sortBy('avg_ratings') \
+    .saveAsTable('films_bucketed')
 ```
 
 ### Inspect data
@@ -154,8 +154,8 @@ df.select( df["age"] > 24 ).show()
 # show first name and boolean if age > 30
 from pyspark.sql import functions as F
 df.select(
-	"firstName"
-, F.when( df.age > 30 , 1 ).otherwise(0)
+    "firstName"
+    , F.when( df.age > 30 , 1 ).otherwise(0)
 ).show()
 
 # select data using sql expression
@@ -211,7 +211,7 @@ df.withColumn("new_column", F.lit("xyz"))
 
 # create a column with default value as null
 df = df.withColumn("new_column",
-	F.lit( None ).cast( StringType() )
+    F.lit( None ).cast( StringType() )
 )
 
 # create a column based on criteria
@@ -223,10 +223,10 @@ df = df.withColumn("test_col",
 
 # create a column using a UDF
 def categorise(val):
-	if val < 150:
-		return "bucket_1"
-	else:
-		return "bucket_2"
+    if val < 150:
+        return "bucket_1"
+    else:
+        return "bucket_2"
 
 my_udf = F.udf( categorise, StringType() )
 df = df.withColumn("new_col", categorise("existing_col"))
@@ -249,10 +249,10 @@ df = df.select(
 # using SQL select statement
 sqlContext.registerDataFrameAsTable(df, "df_table")
 df = sql.Context.sql("""
-	SELECT 
-	existing_col_name AS existing_1
-,	new_col_name AS new_1
-	FROM df_table
+    SELECT 
+    existing_col_name AS existing_1
+,   new_col_name AS new_1
+    FROM df_table
 """)
 ```
 
@@ -286,8 +286,8 @@ df.filter(filterA).filter(filterB)
 ```python
 # filter movies with avg_ratings > 7.5  and < 8.2
 df.filter(
-	( F.col('avg_ratings') > 7.5 ) &
-	( F.col('avg_ratings') < 8.2 )
+    ( F.col('avg_ratings') > 7.5 ) &
+    ( F.col('avg_ratings') < 8.2 )
 ).show()
 # or
 df.filter( df.avg_ratings.between(7.5, 8.2) ).show()
@@ -323,14 +323,14 @@ df.groupby("plane").count().show()
 
 # multiple aggregations
 df.groupBy('year')\
-	.agg( F.min('budget').alias('min_budget')		\
-	 	, F.max('budget').alias('max_budget')		\
-		, F.sum('revenue').alias('total_revenue')	\
-		, F.avg('revenue').alias('avg_revenue')	\
-		, F.mean('revenue').alias('mean_revenue')	\
-		) \
-	.sort( F.col('year').desc() ) \
-	.show()
+  .agg( F.min('budget').alias('min_budget')\
+  , F.max('budget').alias('max_budget')\
+  , F.sum('revenue').alias('total_revenue')\
+  , F.avg('revenue').alias('avg_revenue')\
+  , F.mean('revenue').alias('mean_revenue')\
+) \
+  .sort( F.col('year').desc() ) \
+  .show()
 ```
 
 ```python
@@ -388,9 +388,8 @@ df1.join(df2, on=['title'], how='left_semi')
 ```python
 # sql version
 query = """
-	SELECT *
-	, ROW_NUMBER() OVER(PARTITION BY train_id ORDER BY time) AS id
-	FROM schedule
+    SELECT * , ROW_NUMBER() OVER(PARTITION BY train_id ORDER BY time) AS id
+    FROM schedule
 """
 spark.sql(query).show()
 
@@ -398,8 +397,8 @@ spark.sql(query).show()
 from pyspark.sql import Window
 from pyspark.sql import row_number
 df.withColumn("id",
-	row_number().over(
-		Window.partitionBy("train_id").orderBy("time") )
+    row_number().over(
+    Window.partitionBy("train_id").orderBy("time") )
 )
 ```
 
@@ -436,7 +435,7 @@ df.select("col", monotonically_increasing_id().alias("id"))
 ### Case style statement
 ```python
 df.withColumn("title",
-	when( df.id < 25000 , "Preface" )
+  when( df.id < 25000 , "Preface" )
  .when( df.id < 50000 , "Chapter 1" )
  .when( df.id < 75000 , "Chapter 2" )
  .otherwise( "Chapter 3" )
@@ -446,7 +445,7 @@ df.withColumn("title",
 ### Partitioning data
 ```python
 df.withColumn("part",
-	when( df.id < 25000 , 0 )
+  when( df.id < 25000 , 0 )
  .when( df.id < 50000 , 1 )
  .when( df.id < 75000 , 2 )
  .otherwise( 3 )
@@ -462,10 +461,10 @@ print(df2.rdd.getNumPartitions()) # 4
 ```python
 # split the "clause" column into a column called "words"
 split_df = clauses_df.select(
-	split( "clause" , " " ).alias( "words" )
+    split( "clause" , " " ).alias( "words" )
 )
 
 exploded_df = split_df.select(
-	explode( "words" ).alias( "word" )
+    explode( "words" ).alias( "word" )
 )
 ```
